@@ -27,6 +27,8 @@ recent_grads %>%
        y="Median salary ($)", x="Percentage of degrees earned by males",
        caption = "Source: fivethirtyeight.com")
 
+# Trend graphs showing pay gender imbalance by category of college major
+# (faceted by Major_category)
 recent_grads %>%
   # filter(Major_category == "Industrial Arts & Consumer Services") %>%
   select(Major_category, Major, ShareWomen, Median) %>%
