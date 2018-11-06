@@ -40,3 +40,4 @@ Data/all-ages.csv
 *.gz
 29_recent_grads_Scratch.R
 31_R_downloads_Scratch.R
+.Rproj.user
