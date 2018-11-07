@@ -1,9 +1,15 @@
+# Load libraries
 library(tidyverse)
 library(ggmap)
 library(RColorBrewer)
 
+# Read the data into a data file
 us_wind <- read_csv('./Data/us_wind.csv')
 
+# Process the data for all installations with valid date and capacity
+# Select only relevant variables related to location and capacity
+# Only withinthe continental US (lower 48 states)
+# Calculate decade from year operational
 wind_cap <- us_wind %>%
   distinct(t_fips, .keep_all = TRUE) %>%
   select(state = t_state, county = t_county,
@@ -19,6 +25,10 @@ wind_cap <- us_wind %>%
                             TRUE                       ~ "Unknown")) %>%
   mutate(turbine = turbine / 10)
 
+# Process the data for all installations with invalid date and capacity
+# Select only relevant variables related to location and capacity
+# Only withinthe continental US (lower 48 states)
+# Calculate decade from year operational
 wind_unknown <- us_wind %>%
   distinct(t_fips, .keep_all = TRUE) %>%
   select(state = t_state, county = t_county,
@@ -33,9 +43,15 @@ wind_unknown <- us_wind %>%
                             TRUE                       ~ "Unknown"))
 
 
-# states <- c(left = -125, bottom = 25.75, right = -67, top = 49)
+# Set scope for map plot - continental US
 states <- c(left = -125, bottom = 25, right = -65, top = 50)
+
+# Read map tiles from stamen mapping service
 map <- get_stamenmap(states, zoom = 5, maptype = "terrain-background")
+
+# Plot the map
+# Add points for all installations - color by decade, size by capacity
+# Add + for all invalid installations (unknown year/capacity)
 ggmap(map) +
   geom_point(aes(x=lng, y=lat,
                  colour=factor(decade, levels=c("1980s", "1990s", "2000s",
@@ -55,6 +71,9 @@ ggmap(map) +
        x="",
        caption = "Source: usgs.gov")
 
+# Create graph with2 y-axes to track changes in total capacity & turbine output
+# Summarise total capacity and average turbine capacity (efficiency)
+# Plot total output as a bar chart, turbine efficiency as a line graph
 wind_cap %>%
   group_by(year) %>%
   filter(year <= 2017 & year >= 2000) %>%
