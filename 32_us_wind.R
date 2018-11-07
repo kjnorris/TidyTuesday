@@ -22,8 +22,7 @@ wind_cap <- us_wind %>%
                             year >= 1990 & year < 2000 ~ "1990s",
                             year >= 2000 & year < 2010 ~ "2000s",
                             year >= 2010               ~ "2010s",
-                            TRUE                       ~ "Unknown")) %>%
-  mutate(turbine = turbine / 10)
+                            TRUE                       ~ "Unknown"))
 
 # Process the data for all installations with invalid date and capacity
 # Select only relevant variables related to location and capacity
@@ -92,6 +91,6 @@ wind_cap %>%
   theme_minimal() +
   theme(legend.position = "top", legend.direction = "horizontal") +
   labs(title = "Rising Output and Efficiency Since 2000",
-       subtitle = "Total capacity installed and average turbine output per year",
+       subtitle = "Total capacity installed vs. average turbine output per year",
        y="Total Capacity (MW)", x="",
        caption = "Source: usgs.gov")
