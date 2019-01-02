@@ -5,7 +5,8 @@
 # Session Data files
 .RData
 
-# Environment
+# Environment files
+=======
 .Renviron
 
 # Example code in package build process
