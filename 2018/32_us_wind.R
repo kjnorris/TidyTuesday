@@ -3,13 +3,12 @@ library(tidyverse)
 library(ggmap)
 library(RColorBrewer)
 
-# Read the data into a data file
-us_wind <- read_csv('./Data/us_wind.csv')
-
 # Process the data for all installations with valid date and capacity
 # Select only relevant variables related to location and capacity
 # Only withinthe continental US (lower 48 states)
 # Calculate decade from year operational
+us_wind <- read_csv('./Data/us_wind.csv')
+
 wind_cap <- us_wind %>%
   distinct(t_fips, .keep_all = TRUE) %>%
   select(state = t_state, county = t_county,
@@ -28,6 +27,7 @@ wind_cap <- us_wind %>%
 # Select only relevant variables related to location and capacity
 # Only withinthe continental US (lower 48 states)
 # Calculate decade from year operational
+
 wind_unknown <- us_wind %>%
   distinct(t_fips, .keep_all = TRUE) %>%
   select(state = t_state, county = t_county,
