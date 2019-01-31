@@ -1,6 +1,7 @@
 # Load necessary libraries
 library(tidyverse)
 
+
 # Load the relevant files
 # Basic GitHub Content: https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-01-29/
 # Available Files:
@@ -8,11 +9,12 @@ library(tidyverse)
 # fluid_milk_sales.csv : sales data by type
 # milk_product_facts.csv : products by type and volume (pounds) per person
 # clean_cheese.csv : milk used to produce cheese by type per person
-# stats_milk_production.csv : production by state and region
+# state_milk_production.csv : production by state and region
 
 raw_fluid_sales <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-01-29/fluid_milk_sales.csv")
 raw_milk_cow <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-01-29/milkcow_facts.csv")
 raw_products <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-01-29/milk_products_facts.csv")
+state_milk_production <- read_csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2019/2019-01-29/state_milk_production.csv")
 
 # Clean up milk sales data including scaling sales volume
 # Order milk_type factor by sales volume
@@ -20,9 +22,6 @@ fluid_sales <- raw_fluid_sales %>%
   mutate(pounds = pounds/1000000) %>%
   filter(!str_detect(milk_type, "Flavored|Eggnog|Buttermilk")) %>%
   select(year, milk_type, pounds)
-
-
-
 
 # Clean up production data including scaling volums
 milk_cow <- raw_milk_cow %>%
@@ -86,6 +85,52 @@ milk_products %>%
   labs(title = "America's Changing Tastes",
        subtitle = "Less milk, more cheese and yogurt",
        y="Annual Pounds per Person", x="",
+       caption = "Source: USDA")
+
+# Bonus: milk production by state and region
+state_milk <- state_milk_production %>%
+  mutate(pounds = milk_produced / 1000000) %>%
+  group_by(region, state) %>%
+  mutate(State = fct_reorder(state, pounds)) %>%
+  ungroup() %>%
+  select(region, State, year, pounds)
+
+
+# Bonus: top 10 milk producing states in 2017
+# by state and region
+top_10_milk <- state_milk %>%
+  filter(year == 2017) %>%
+  arrange(desc(pounds)) %>%
+  top_n(10) %>%
+  select(State) %>%
+  .$State
+
+# Minor adjustments for text labeling purpioses
+offset <- 2500
+offset_list <- c(offset, -offset, offset, offset, -offset,
+                 offset, offset, -offset, offset, -offset)
+
+state_labels <- state_milk %>%
+  filter(State %in% top_10_milk & year == 2017) %>%
+  bind_cols(tibble(offset = offset_list)) %>%
+  mutate(text_loc = pounds + offset)
+
+state_milk %>%
+  filter(State %in% top_10_milk) %>%
+  mutate(State == fct_reorder(State, pounds)) %>%
+  ggplot(aes(x=year, y=pounds)) +
+  geom_line(aes(colour=State), size=1) +
+  geom_text(aes(x = 2017, y = text_loc, label = State),
+            data = state_labels, colour = "grey20", hjust = 1) +
+  facet_wrap(vars(region))+
+  scale_y_continuous(limits = c(0, 50000), breaks = seq(0, 50000, 12500))+
+  scale_x_continuous(limits = c(1970, 2020), breaks = seq(1970, 2020, 10)) +
+  theme_minimal() +
+  scale_colour_manual(name = "", values = palette(rainbow(10))) +
+  theme(legend.position = "none", legend.direction = "horizontal") +
+  labs(title = "Regional Milk Production",
+       subtitle = "Top 10 milk producing states in 2017",
+       y="Pounds (in millions)", x="",
        caption = "Source: USDA")
 
 
